@@ -40,6 +40,7 @@ function optOrDef(opt, def) {
  *  variation in sec
  * @param {Number} [options.durationAbs=0.1] - Absolute grain duration in sec
  * @param {Number} [options.durationRel=0] - Grain duration relative to grain
+ * @param {Number} [options.durationVar=0] - Amout of random grain duration
  *  period (overlap)
  * @param {Number} [options.attackAbs=0] - Absolute attack time in sec
  * @param {Number} [options.attackRel=0.5] - Attack time relative to grain duration
@@ -161,6 +162,17 @@ class GranularEngine extends AudioTimeEngine {
      * @instance
      */
     this.durationRel = optOrDef(options.durationRel, 0);
+    
+        /**
+         * Amout of random grain duration variation in sec
+         *
+         * @type {Number}
+         * @name durationVar
+         * @default 0
+         * @memberof GranularEngine
+         * @instance
+         */
+        this.durationVar = optOrDef(options.durationVar, 0);
 
     /**
      * Absolute attack time in sec
@@ -377,6 +389,9 @@ class GranularEngine extends AudioTimeEngine {
         var randomResampling = (Math.random() - 0.5) * 2.0 * this.resamplingVar;
         resamplingRate = Math.pow(2.0, (this.resampling + randomResampling) / 1200.0);
       }
+      
+      // randomize grain duration
+      if (this.durationVar > 0) grainDuration += (2.0 * Math.random() - 1) * this.durationVar;
 
       grainPeriod += this.periodRel * grainDuration;
       grainDuration += this.durationRel * grainPeriod;

@@ -10,6 +10,7 @@ export { default as GranularEngine } from './engines/granular-engine';
 export { default as Metronome } from './engines/metronome';
 export { default as PlayerEngine } from './engines/player-engine';
 export { default as SegmentEngine } from './engines/segment-engine';
+export { default as SequencerEngine } from './engines/sequencer-engine';
 
 // masters
 export { default as PlayControl } from './masters/play-control';

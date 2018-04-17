@@ -717,6 +717,10 @@ class PhasevocoderEngine extends AudioTimeEngine {
       this.__currentEndTime = 0;
     }
   }
+
+  stretchFactor(newAlpha) {
+      this._pv.alpha = newAlpha;
+  }
 }
 
 export default PhasevocoderEngine;

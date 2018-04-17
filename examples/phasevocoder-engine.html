@@ -105,8 +105,11 @@ loader.load(assets).then(function(loaded) {
     scheduledSegmentEngine.positionVar = transportedSegmentEngine.positionVar = value;
   });
 
-  new wavesBasicControllers.Slider("Duration", 0, 200, 1, 200, "%", '', containerId, function(value) {
+  var durationSlider = new wavesBasicControllers.Slider("Duration (stretches the segments)", 1, 200, 1, 200, "%", '', containerId, function(value) {
     scheduledSegmentEngine.durationRel = transportedSegmentEngine.durationRel = 0.01 * value;
+    scheduledSegmentEngine.stretchFactor(value * 0.01);
+    transportedSegmentEngine.stretchFactor(value * 0.01);
+    stretchSlider.value = value * 0.01;
   });
 
   new wavesBasicControllers.Slider("Resampling", -2400, 2400, 1, 0, "cent", '', containerId, function(value) {
@@ -116,6 +119,7 @@ loader.load(assets).then(function(loaded) {
   new wavesBasicControllers.Slider("Resampling Var", 0, 1200, 1, 0, "cent", '', containerId, function(value) {
     scheduledSegmentEngine.resamplingVar = transportedSegmentEngine.resamplingVar = value;
   });
+  
 // ---------\/---------
 });
 // ---------/\---------

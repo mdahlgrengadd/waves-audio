@@ -22,8 +22,8 @@ import audioContext from '../core/audio-context';
 function BufferedPV(frameSize) {
 
 	var _frameSize = frameSize || 4096;
-	var _pvL = new PhaseVocoder(_frameSize, 44100); _pvL.init();
-	var _pvR = new PhaseVocoder(_frameSize, 44100); _pvR.init();
+	var _pvL = new PhaseVocoder(_frameSize, audioContext.sampleRate); _pvL.init();
+	var _pvR = new PhaseVocoder(_frameSize, audioContext.sampleRate); _pvR.init();
 	var _buffer;
 	var _position = 0;
 	var _newAlpha = 1;

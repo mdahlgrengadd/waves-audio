@@ -241,7 +241,7 @@ class PhasevocoderEngine extends AudioTimeEngine {
      * @memberof PhasevocoderEngine
      * @instance
      */
-    this.offsetAbs = optOrDef(options.offsetAbs, -0.005);
+    this.offsetAbs = optOrDef(options.offsetAbs, 0.000);
 
     /**
      * Segment offset relative to segment duration
@@ -261,7 +261,7 @@ class PhasevocoderEngine extends AudioTimeEngine {
      * @memberof PhasevocoderEngine
      * @instance
      */
-    this.delay = optOrDef(options.delay, 0.005);
+    this.delay = optOrDef(options.delay, 0.0);
 
     /**
      * Absolute attack time in sec
@@ -271,7 +271,7 @@ class PhasevocoderEngine extends AudioTimeEngine {
      * @memberof PhasevocoderEngine
      * @instance
      */
-    this.attackAbs = optOrDef(options.attackAbs, 0.005);
+    this.attackAbs = optOrDef(options.attackAbs, 0.0);
 
     /**
      * Attack time relative to segment duration
@@ -291,7 +291,7 @@ class PhasevocoderEngine extends AudioTimeEngine {
      * @memberof PhasevocoderEngine
      * @instance
      */
-    this.releaseAbs = optOrDef(options.releaseAbs, 0.005);
+    this.releaseAbs = optOrDef(options.releaseAbs, 0.0);
 
     /**
      * Release time relative to segment duration
@@ -391,12 +391,36 @@ class PhasevocoderEngine extends AudioTimeEngine {
 
     this.outputNode = this.audioContext.createGain();
 
-    // Buffered PhaseVocoder 
-    this.BUFFER_SIZE = 4096;
-    this.FRAME_SIZE = 2048;
-    this._pv = new BufferedPV(this.FRAME_SIZE);
+   /**
+   * Size of phasevocoder analysis frame
+   * @name frameSize
+   * @type {Number}
+   * @default 4096
+   * @memberof PhasevocoderEngine
+   * @instance
+   */
+    this.frameSize = optOrDef(options.frameSize, 2048);
+
+    // Setup vocoder
+    this._pv = new BufferedPV(this.frameSize);
     this._pv.set_audio_buffer(this.buffer);
-    this._pv.alpha = 2; // Stretch factor
+    this._pv.alpha = 1;
+
+    // FIXME: BUFFER_SIZE not in use yet...
+    // Thinking that if user dont provide segments (ie markerbuffer), 
+    // then the engine just chops the buffer into chunks whith this size.
+    this.BUFFER_SIZE = 4096;
+        
+   /**
+   * The amount to stretch the audio segments with
+   * @name stretchFactor
+   * @type {Number}
+   * @default 1
+   * @memberof PhasevocoderEngine
+   * @instance
+   */
+    this.stretchFactor = optOrDef(options.stretchFactor, 1);
+
   }
 
   /**
@@ -657,13 +681,15 @@ class PhasevocoderEngine extends AudioTimeEngine {
         // Buffer to save the stretch audio into
         var stretchedBuffer = audioContext.createBuffer(2, segmentDuration * audioContext.sampleRate, audioContext.sampleRate);
 
-        // This preserves attack transients on segment offsets
-        this._pv.resetPhase(); 
-
         // Set the phasevocoder's position in source buffer (ie this.buffer).
-        this._pv.position = segmentPosition * audioContext.sampleRate;
-
+        this._pv.position = segmentPosition * audioContext.sampleRate;       
         this._pv.process(stretchedBuffer);
+        // FIXME: If phase is not reset, the audio is silenced when looped... dont know why...
+        if (this.positionArray) {
+          if (segmentIndex == this.positionArray.length - 1) {
+            this._pv.resetPhase();
+          }
+        }
 
         source.buffer = stretchedBuffer;
         source.playbackRate.value = resamplingRate;
@@ -678,6 +704,7 @@ class PhasevocoderEngine extends AudioTimeEngine {
         this.__currentEndTime = segmentEndTime;
       }
     }
+
 
     // grain period randon variation
     if (this.periodVar > 0.0)
@@ -718,9 +745,11 @@ class PhasevocoderEngine extends AudioTimeEngine {
     }
   }
 
-  stretchFactor(newAlpha) {
-      this._pv.alpha = newAlpha;
+  set stretchFactor (newAlpha) {
+      if(this._pv)
+        this._pv.alpha = newAlpha;
   }
+
 }
 
 export default PhasevocoderEngine;

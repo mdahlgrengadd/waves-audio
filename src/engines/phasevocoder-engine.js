@@ -693,7 +693,8 @@ class PhasevocoderEngine extends AudioTimeEngine {
 
         source.buffer = stretchedBuffer;
         source.playbackRate.value = resamplingRate;
-        source.connect(envelope);
+        //source.connect(envelope); //FIXME: Using envelope causes "tremolo" even if all ramping is 0.
+        source.connect(audioContext.destination); 
 
         source.start(segmentTime);
         source.stop(segmentTime + segmentDuration);

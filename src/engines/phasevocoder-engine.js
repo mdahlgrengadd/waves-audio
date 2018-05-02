@@ -1,6 +1,7 @@
 import AudioTimeEngine from '../core/audio-time-engine';
-import PhaseVocoder from '../utils/PV_fast_5';
-import BufferedPV from '../utils/buffered-pv';
+import PV from '../utils/buffered-pv';
+//import PV from '../utils/simple-pv';
+
 
 function optOrDef(opt, def) {
   if (opt !== undefined)
@@ -392,19 +393,40 @@ class PhasevocoderEngine extends AudioTimeEngine {
     this.outputNode = this.audioContext.createGain();
 
    /**
-   * Size of phasevocoder analysis frame
-   * @name frameSize
-   * @type {Number}
-   * @default 4096
+   * Optionally set function to use for FFT transform
+   * @name setSTFT
+   * @type {function}
+   * @default null
    * @memberof PhasevocoderEngine
    * @instance
    */
+    this.setSTFT = function (_STFT) { this._pv.STFT = _STFT };
+
+    /**
+    * Optionally set function to use for inverse FFT transform
+    * @name setSTFT
+    * @type {function}
+    * @default null
+    * @memberof PhasevocoderEngine
+    * @instance
+    */
+    this.setISTFT = function(_ISTFT) {this._pv.ISTFT = _ISTFT};
+
+    /**
+     * Size of phasevocoder analysis frame
+     * @name frameSize
+     * @type {Number}
+     * @default 4096
+     * @memberof PhasevocoderEngine
+     * @instance
+     */
     this.frameSize = optOrDef(options.frameSize, 2048);
 
+
     // Setup vocoder
-    this._pv = new BufferedPV(this.frameSize);
+    this._pv = new PV(this.frameSize); // new BufferedPV(this.frameSize);
     this._pv.set_audio_buffer(this.buffer);
-    this._pv.alpha = 1;
+    this._pv.alpha = 2;
 
     // FIXME: BUFFER_SIZE not in use yet...
     // Thinking that if user dont provide segments (ie markerbuffer), 
@@ -679,6 +701,7 @@ class PhasevocoderEngine extends AudioTimeEngine {
         var source = audioContext.createBufferSource();
 
         // Buffer to save the stretch audio into
+
         var stretchedBuffer = audioContext.createBuffer(2, segmentDuration * audioContext.sampleRate, audioContext.sampleRate);
 
         // Set the phasevocoder's position in source buffer (ie this.buffer).

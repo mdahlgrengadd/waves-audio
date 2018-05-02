@@ -32,7 +32,7 @@ function PhaseVocoder(winSize, sampleRate) {
 
 	var _first = true;
 
-	var _overlapFactor = 4;
+	var _overlapFactor = 16;
 
 	var _lastInputAlpha = 1;
 
@@ -330,7 +330,7 @@ function PhaseVocoder(winSize, sampleRate) {
 		return _squaredFramingWindow;
 	}
 
-	this.set_alpha = function(newAlpha) {
+	this.set_alpha2 = function(newAlpha) {
 		_lastInputAlpha = newAlpha;
 		if (newAlpha <= 0.8)
 			_overlapFactor = 2;
@@ -347,6 +347,15 @@ function PhaseVocoder(winSize, sampleRate) {
 
 		// _Hs = round(_winSize/2);
 		// _Ha = round(_Hs / newAlpha);
+	}
+	this.set_alpha = function (newAlpha) {
+		_lastInputAlpha = newAlpha;
+		_overlapFactor = Math.min(Math.floor((Math.pow(4, (newAlpha) / 4) * 2) / 1) * 2, 128);
+
+		_Ha = Math.round(_winSize / _overlapFactor);
+		_Hs = Math.round(newAlpha * _Ha);
+		// _RS = Math.round(_winSize/2);
+		// _RA = Math.round(_RS / newAlpha);
 	}
 
 	this.get_alpha_step = function() {

@@ -17,13 +17,16 @@
 
 import CBuffer from './cbuffer';
 import PhaseVocoder from './PV_fast_5';
+//import PhaseVocoder from '../utils/PV_fast_pulsefft';
 import audioContext from '../core/audio-context';
 
-function BufferedPV(frameSize) {
+function PV(frameSize) {
 
 	var _frameSize = frameSize || 4096;
-	var _pvL = new PhaseVocoder(_frameSize, audioContext.sampleRate); _pvL.init();
-	var _pvR = new PhaseVocoder(_frameSize, audioContext.sampleRate); _pvR.init();
+	
+	let _pvL =  new PhaseVocoder(_frameSize, audioContext.sampleRate); _pvL.init();
+	let _pvR =  new PhaseVocoder(_frameSize, audioContext.sampleRate); _pvR.init();
+
 	var _buffer;
 	var _position = 0;
 	var _newAlpha = 1;
@@ -122,11 +125,13 @@ function BufferedPV(frameSize) {
 			/* LEFT */
 			_pvL.process(bufL, _midBufL);
 			_pvR.process(bufR, _midBufR);
+			
 			for (var i = sampleCounter; _midBufL.size > 0 && i < outputAudioBuffer.length; i++) {
 				ol[i] = _midBufL.shift();
 				or[i] = _midBufR.shift();
+				
 			}
-
+			
 			sampleCounter += _pvL.get_synthesis_hop();
 
 			_position
@@ -142,8 +147,7 @@ function BufferedPV(frameSize) {
 		if (_buffer.numberOfChannels == 2)
 			this.process = this.processStereo;
 		else
-			this.process = this.processMono;
-
+			this.process = this.processMono;		
 		_position = 0;
 		_newAlpha = 1;
 	}
@@ -169,8 +173,26 @@ function BufferedPV(frameSize) {
 			set : function(newAlpha) {
 				_newAlpha = newAlpha;
 			}
+		},
+		'STFT': {
+			get: function () {
+				return _pvL.STFT;
+			},
+			set: function (newSTFT) {
+				_pvL.STFT = newSTFT;
+				_pvR.STFT = newSTFT;
+			}
+		},
+		'ISTFT': {
+			get: function () {
+				return _pvL.ISTFT;
+			},
+			set: function (newISTFT) {
+				_pvL.ISTFT = newISTFT;
+				_pvR.ISTFT = newISTFT;
+			}
 		}
 	});
 }
 
-export default BufferedPV;
+export default PV;

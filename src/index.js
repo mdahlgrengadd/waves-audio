@@ -12,6 +12,7 @@ export { default as PlayerEngine } from './engines/player-engine';
 export { default as SegmentEngine } from './engines/segment-engine';
 export { default as SequencerEngine } from './engines/sequencer-engine';
 export { default as PhasevocoderEngine } from './engines/phasevocoder-engine';
+export {default as PulseFFTTransforms } from './utils/pulse-transforms';
 
 // masters
 export { default as PlayControl } from './masters/play-control';
